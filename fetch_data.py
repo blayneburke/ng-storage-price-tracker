@@ -7,7 +7,7 @@ Pulls two raw datasets from the EIA API v2:
    Storage Report).
 2. Daily Henry Hub natural gas spot prices.
 
-Both are written to data/raw/ as untouched CSVs. No cleaning, aggregation,
+Both are written to artifacts/raw/ as untouched CSVs. No cleaning, aggregation,
 or derived columns happen in this module. Keeping the raw pull separate
 from cleaning (see clean_align.py) makes it easy to re-run the pull on a
 schedule without re-deriving logic, and gives the project a clear,

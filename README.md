@@ -1,9 +1,7 @@
 # Natural Gas Storage and Price Tracker
 
-Portfolio project analyzing the relationship between the EIA's weekly natural
-gas storage report and Henry Hub spot prices. Built as a companion piece to
-the ERCOT Day Ahead Price Forecasting Dashboard, covering the gas side of the
-power and gas market rather than the electricity side.
+Analyzing the relationship between the EIA's weekly natural
+gas storage report and Henry Hub spot prices. 
 
 **Core question:** How closely does the weekly natural gas storage report
 relate to Henry Hub spot prices, and does the market react more strongly when
