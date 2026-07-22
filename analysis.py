@@ -45,6 +45,46 @@ import numpy as np
 import pandas as pd
 
 
+# Verified holiday-adjusted release date overrides, sourced directly from
+# EIA's published release schedule: https://ir.eia.gov/ngs/schedule.html
+# Keyed by the storage report's week_ending date (the Friday the report
+# covers). Value is the ACTUAL release date, which may differ from the
+# standard week_ending + 6 days (the following Thursday) rule.
+#
+# IMPORTANT LIMITATION: EIA's published schedule page only lists confirmed
+# exceptions from January 2025 onward. No equivalent verified historical
+# list was found for 2021-2024, so weeks in that range fall back to the
+# standard +6 day rule even where a real holiday shift may have occurred
+# (for example, Thanksgiving, Christmas, or Juneteenth in those years).
+# This is a known, documented gap in release-date precision for the
+# earlier portion of the pulled history, not an oversight, see the README
+# limitations section.
+RELEASE_DATE_OVERRIDES = {
+    # week_ending (Friday) -> actual release date
+    "2024-12-27": "2025-01-03",  # New Year's Day
+    "2025-01-03": "2025-01-08",  # National Day of Mourning (Jimmy Carter)
+    "2025-06-13": "2025-06-18",  # Juneteenth
+    "2025-11-07": "2025-11-14",  # Veterans Day
+    "2025-11-21": "2025-11-26",  # Thanksgiving
+    "2025-12-19": "2025-12-29",  # Christmas
+    "2025-12-26": "2025-12-31",  # New Year's Day
+    "2026-11-06": "2026-11-13",  # Veterans Day
+    "2026-11-20": "2026-11-25",  # Thanksgiving
+}
+
+
+def get_release_date(week_ending: pd.Timestamp, release_lag_days: int = 6) -> pd.Timestamp:
+    """
+    Returns the actual (or best-available) release date for a given
+    storage report week. Checks the verified override table first, falls
+    back to the standard week_ending + release_lag_days rule (the
+    following Thursday) if no override is known for that week.
+    """
+    key = week_ending.strftime("%Y-%m-%d")
+    if key in RELEASE_DATE_OVERRIDES:
+        return pd.Timestamp(RELEASE_DATE_OVERRIDES[key])
+    return week_ending + pd.Timedelta(days=release_lag_days)
+
 def add_expected_net_change(storage: pd.DataFrame, lookback_years: int = 5) -> pd.DataFrame:
     """
     Adds expected_net_change_bcf and storage_surprise_bcf to a cleaned
@@ -102,7 +142,7 @@ def compute_price_reaction(storage: pd.DataFrame, daily_price: pd.DataFrame,
 
     rows = []
     for _, row in storage.iterrows():
-        release_date = row["week_ending"] + pd.Timedelta(days=release_lag_days)
+        release_date = get_release_date(row["week_ending"], release_lag_days)
 
         # last trading day strictly before release_date
         pre_idx = np.searchsorted(dates, np.datetime64(release_date), side="left") - 1
