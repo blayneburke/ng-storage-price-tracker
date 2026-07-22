@@ -2,8 +2,8 @@
 charts.py
 
 Builds the plotly figures used by the dashboard. Kept separate from
-app.py so these can be unit tested against synthetic data without needing
-a running Streamlit session.
+streamlit_app.py so these can be unit tested against synthetic data
+without needing a running Streamlit session.
 """
 
 import pandas as pd
@@ -12,17 +12,10 @@ import plotly.graph_objects as go
 
 def build_storage_levels_figure(df: pd.DataFrame, selected_year: int,
                                  compare_years: list = None) -> go.Figure:
-    """
-    Plots the selected year's storage level against its own five year
-    range band (min to max), both indexed by week of year so the
-    comparison lines up regardless of which calendar year is selected.
-    Optionally overlays additional prior years as thin reference lines.
-    """
     year_df = df[df["year"] == selected_year].sort_values("week_of_year")
 
     fig = go.Figure()
 
-    # five year range band, drawn first so it sits behind everything else
     band_df = year_df.dropna(subset=["five_yr_min_bcf", "five_yr_max_bcf"])
     if len(band_df) > 0:
         fig.add_trace(go.Scatter(
@@ -67,13 +60,6 @@ def build_storage_levels_figure(df: pd.DataFrame, selected_year: int,
 
 def build_price_reaction_figure(df: pd.DataFrame, reaction_col: str = "price_change_1d",
                                  regime_filter: str = "all") -> go.Figure:
-    """
-    Scatter plot of price reaction on the y-axis against release date on
-    the x-axis, with marker color and size mapped to storage surprise
-    magnitude and direction. A diverging color scale is used so a bigger
-    draw than expected (negative surprise) and a bigger build than
-    expected (positive surprise) read as visually distinct.
-    """
     plot_df = df.dropna(subset=["storage_surprise_bcf", reaction_col]).copy()
 
     if regime_filter != "all":
@@ -115,11 +101,6 @@ def build_price_reaction_figure(df: pd.DataFrame, reaction_col: str = "price_cha
 
 
 def regime_summary_table(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Small summary table comparing mean absolute price reaction between
-    above-average and below-average storage regimes, the specific
-    comparison the project's core question asks for.
-    """
     rows = []
     for regime in ["above_avg", "below_avg"]:
         subset = df[df["storage_regime"] == regime].dropna(

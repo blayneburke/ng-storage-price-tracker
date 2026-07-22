@@ -14,7 +14,9 @@ import sys
 
 import streamlit as st
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # src/
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT) 
+
 
 import config
 from data_loader import load_analysis_data, available_years
@@ -42,10 +44,8 @@ def main():
         "storage is above or below its five year average?"
     )
 
-    data_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        config.PROCESSED_DATA_DIR, "analysis_weekly.csv"
-    )
+    data_path = os.path.join(REPO_ROOT, config.PROCESSED_DATA_DIR, "analysis_weekly.csv")
+    
 
     if not os.path.exists(data_path):
         st.error(
